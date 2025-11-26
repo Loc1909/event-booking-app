@@ -7,6 +7,8 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Column;
 import jakarta.persistence.PrePersist;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @MappedSuperclass
@@ -17,11 +19,13 @@ public abstract class BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @CreationTimestamp
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
 
-  @PrePersist
-  protected void onCreate() {
-    this.createdAt = LocalDateTime.now();
-  }
+//  => dùng Hibernate cho ngắn
+//  @PrePersist
+//  protected void onCreate() {
+//    this.createdAt = LocalDateTime.now();
+//  }
 }

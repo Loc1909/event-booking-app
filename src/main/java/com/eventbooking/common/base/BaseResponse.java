@@ -1,19 +1,25 @@
 package com.eventbooking.common.base;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
-@Data
+@Getter
+@Setter
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseResponse<T> {
-  private boolean success;
-  private String message;
-  private T data;
-  private Instant timestamp = Instant.now();
+  boolean success;
+  String message;
+  T data;
+
+  Object errors;
+
+  @Builder.Default
+  Instant timestamp = Instant.now();
 }

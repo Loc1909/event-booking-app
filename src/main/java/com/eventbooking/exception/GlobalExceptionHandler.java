@@ -58,15 +58,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   // 2. Gộp TẤT CẢ các Custom Exception (Handlers 2, 3, 4, 5, 6, 7) vào một Handler duy nhất
   // đều kế thừa từ BaseException hoặc có cấu trúc interface chung để lấy HttpStatus và ErrorCode.
-  @ExceptionHandler({
-    ConstraintViolationException.class,
-    EntityNotFoundException.class,
-    BadRequestException.class,
-    ConflictException.class,
-    ForbiddenException.class,
-    ResourceNotFoundException.class,
-    UnauthorizedException.class
-  })
+//  @ExceptionHandler({
+//    ConstraintViolationException.class,
+//    EntityNotFoundException.class,
+//    BadRequestException.class,
+//    ConflictException.class,
+//    ForbiddenException.class,
+//    ResourceNotFoundException.class,
+//    UnauthorizedException.class
+//  })
+//  => Hơi cồng kềnh
+  @ExceptionHandler(BaseException.class)
   public ResponseEntity<Object> handleCustomExceptions(
       BaseException ex, HttpServletRequest request) {
     Map<String, Object> body = buildErrorBody(ex, request.getRequestURI());
