@@ -1,5 +1,6 @@
 package com.eventbooking.filter;
 
+import com.eventbooking.security.UserPrincipal;
 import com.eventbooking.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -62,14 +63,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       Long userId = jwtUtil.getUserIdFromToken(token);
       String email = jwtUtil.getEmailFromToken(token);
       
-      // Lưu user ID vào request attribute để sử dụng trong controller/service
-      request.setAttribute("userId", userId);
-      
       // Tạo Authentication object và set vào SecurityContext
-      // Điều này cần thiết để Spring Security nhận biết user đã được authenticate
+      UserPrincipal principal = new UserPrincipal(userId, email);
       UsernamePasswordAuthenticationToken authentication = 
           new UsernamePasswordAuthenticationToken(
-              email, 
+              principal, 
               null, 
               Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
           );
