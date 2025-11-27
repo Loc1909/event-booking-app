@@ -37,4 +37,12 @@ public class Booking extends BaseEntity {
 
   @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
   private Payment payment;
+
+  public Booking(User user, Event event, Payment payment) {
+    this.user = user;
+    this.event = event;
+    this.payment = payment;
+
+    payment.setBooking(this);
+  }
 }

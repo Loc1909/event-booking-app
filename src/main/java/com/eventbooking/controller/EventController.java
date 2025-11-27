@@ -16,21 +16,21 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/events")
 @RequiredArgsConstructor
 @EnableMethodSecurity
-@RequestMapping("/api/events")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EventController {
     EventService service;
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<BaseResponse<EventDetailsResponse>> create(@Valid @RequestBody EventRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponseBuilder.success("Event created successfully", service.create(request)));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<BaseResponse<EventDetailsResponse>> update(
             @PathVariable Long id,
@@ -39,7 +39,7 @@ public class EventController {
                 ApiResponseBuilder.success("Event updated successfully", service.update(id, request)));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

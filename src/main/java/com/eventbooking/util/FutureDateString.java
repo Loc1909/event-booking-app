@@ -11,6 +11,7 @@ import java.lang.annotation.*;
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FutureDateString {
+    String regexp();
     String message () default "Invalid format date";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

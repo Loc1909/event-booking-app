@@ -1,5 +1,6 @@
 package com.eventbooking.dto.event;
 
+import com.eventbooking.common.constant.RegexPattern;
 import com.eventbooking.util.FutureDateString;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
@@ -10,7 +11,7 @@ public record EventRequest (
         String title,
 
         @NotBlank(message = "Date & Time is required")
-        @FutureDateString
+        @FutureDateString (regexp = RegexPattern.ISO_DATE)
         String dateTime,
 
         @NotNull(message = "Location is required")

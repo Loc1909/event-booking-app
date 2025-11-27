@@ -1,26 +1,27 @@
 package com.eventbooking.exception;
 
 import com.eventbooking.common.base.BaseException;
+import com.eventbooking.util.ApiResponseBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+@ControllerAdvice
+public class GlobalExceptionHandler{
 
   // Phương thức chung để xây dựng Body phản hồi lỗi cho các Custom Exception
   private Map<String, Object> buildErrorBody(BaseException ex, String path) {
@@ -34,30 +35,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   // 1. Bắt lỗi validation (DTO & Entity)
-  @Override
-  protected ResponseEntity<Object> handleMethodArgumentNotValid(
-      MethodArgumentNotValidException ex,
-      HttpHeaders headers,
-      HttpStatusCode status,
-      WebRequest request) {
-
-    String path = request.getDescription(false);
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", status.value());
-
-    List<String> errors =
-        ex.getBindingResult().getAllErrors().stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.toList());
-
-    body.put("errors", errors);
-    body.put("path", path.replace("uri=", "")); // Tối ưu hóa path hiển thị
-    return new ResponseEntity<>(body, status);
-  }
-
-  // 2. Gộp TẤT CẢ các Custom Exception (Handlers 2, 3, 4, 5, 6, 7) vào một Handler duy nhất
-  // đều kế thừa từ BaseException hoặc có cấu trúc interface chung để lấy HttpStatus và ErrorCode.
+//  @Override
+//  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+//      MethodArgumentNotValidException ex,
+//      HttpHeaders headers,
+//      HttpStatusCode status,
+//      WebRequest request) {
+//
+//    String path = request.getDescription(false);
+//    Map<String, Object> body = new LinkedHashMap<>();
+//    body.put("timestamp", LocalDateTime.now());
+//    body.put("status", status.value());
+//
+//    List<String> errors =
+//        ex.getBindingResult().getAllErrors().stream()
+//            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+//            .collect(Collectors.toList());
+//
+//    body.put("errors", errors);
+//    body.put("path", path.replace("uri=", "")); // Tối ưu hóa path hiển thị
+//    return new ResponseEntity<>(body, status);
+//  }
+//
+//  // 2. Gộp TẤT CẢ các Custom Exception (Handlers 2, 3, 4, 5, 6, 7) vào một Handler duy nhất
+//  // đều kế thừa từ BaseException hoặc có cấu trúc interface chung để lấy HttpStatus và ErrorCode.
 //  @ExceptionHandler({
 //    ConstraintViolationException.class,
 //    EntityNotFoundException.class,
@@ -67,23 +68,42 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //    ResourceNotFoundException.class,
 //    UnauthorizedException.class
 //  })
-//  => Hơi cồng kềnh
-  @ExceptionHandler(BaseException.class)
-  public ResponseEntity<Object> handleCustomExceptions(
-      BaseException ex, HttpServletRequest request) {
-    Map<String, Object> body = buildErrorBody(ex, request.getRequestURI());
-    return new ResponseEntity<>(body, ex.getHttpStatus());
+//  public ResponseEntity<Object> handleCustomExceptions(
+//      BaseException ex, HttpServletRequest request) {
+//    Map<String, Object> body = buildErrorBody(ex, request.getRequestURI());
+//    return new ResponseEntity<>(body, ex.getHttpStatus());
+//  }
+
+  @ExceptionHandler(value = BaseException.class)
+  public ResponseEntity<?> handlingRuntimeException(BaseException ex) {
+    return ResponseEntity.status(ex.getHttpStatus())
+            .body(ApiResponseBuilder.error(ex.getMessage(), null));
+  }
+
+  @ExceptionHandler(value = MethodArgumentNotValidException.class)
+  public ResponseEntity<?> handlingValidationException(MethodArgumentNotValidException ex) {
+    List<Map<String, String>> errors = new ArrayList<>();
+
+    for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+      Map<String, String> error = new HashMap<>();
+      error.put("field", fieldError.getField());
+      error.put("message", fieldError.getDefaultMessage());
+      errors.add(error);
+    }
+
+    return ResponseEntity.status(422)
+            .body(ApiResponseBuilder.error("Validation Error", errors));
   }
 
   // 3. Bắt tất cả lỗi còn lại - GIỮ NGUYÊN
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<Object> handleAll(Exception ex, HttpServletRequest request) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("timestamp", LocalDateTime.now());
-    body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-    body.put("errorCode", "INTERNAL_SERVER_ERROR"); // Cung cấp mã lỗi chung
-    body.put("message", "An unexpected error occurred. Please try again later."); // Thông báo chung
-    body.put("path", request.getRequestURI());
-    return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-  }
+//  @ExceptionHandler(Exception.class)
+//  public ResponseEntity<Object> handleAll(Exception ex, HttpServletRequest request) {
+//    Map<String, Object> body = new LinkedHashMap<>();
+//    body.put("timestamp", LocalDateTime.now());
+//    body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+//    body.put("errorCode", "INTERNAL_SERVER_ERROR"); // Cung cấp mã lỗi chung
+//    body.put("message", "An unexpected error occurred. Please try again later."); // Thông báo chung
+//    body.put("path", request.getRequestURI());
+//    return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+//  }
 }

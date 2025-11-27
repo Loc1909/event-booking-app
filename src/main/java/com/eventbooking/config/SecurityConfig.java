@@ -1,5 +1,6 @@
 package com.eventbooking.config;
 
+import com.eventbooking.service.JwtService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -18,19 +21,36 @@ public class SecurityConfig {
             "/api/auth/login", "/api/auth/register"
     };
 
+    JwtService jwtService;
+
     @Bean
-    public SecurityFilterChain filterChain (HttpSecurity http){
+    public SecurityFilterChain filterChain (HttpSecurity http) {
         http.csrf(AbstractHttpConfigurer::disable);
 
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                .anyRequest().permitAll()
-                //.anyRequest().authenticated()
+                //.anyRequest().permitAll()
+                .anyRequest().authenticated()
         );
 
-
+        http.oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(jwtConfigurer -> jwtConfigurer
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                                .decoder(jwtService))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                        .accessDeniedHandler(new JwtAccessDeniedHandler()));
 
         return http.build();
+    }
 
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter gac = new JwtGrantedAuthoritiesConverter();
+        gac.setAuthorityPrefix("");
+        gac.setAuthoritiesClaimName("scope");
+
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(gac);
+        return converter;
     }
 }
