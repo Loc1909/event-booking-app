@@ -10,5 +10,5 @@ public interface AuthService {
   AuthResponse login(LoginRequest request);
 
   /** Tạo tài khoản mới, kiểm tra email trùng lặp */
-  UserResponse register(RegisterRequest request);
+  AuthResponse register(RegisterRequest request);
 }

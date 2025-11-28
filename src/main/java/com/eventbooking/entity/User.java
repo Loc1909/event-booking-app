@@ -25,7 +25,7 @@ public class User extends BaseEntity {
   private String email;
 
   @Column(nullable = false)
-  private String password; // BCrypt hashed
+  private String password;
 
   private String avatar;
 

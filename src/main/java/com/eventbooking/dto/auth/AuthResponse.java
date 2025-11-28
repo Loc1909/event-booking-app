@@ -1,3 +1,3 @@
 package com.eventbooking.dto.auth;
 
-public class AuthResponse {}
+public record AuthResponse(Long userId, String fullName, String email) {}
