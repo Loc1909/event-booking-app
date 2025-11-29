@@ -9,6 +9,8 @@ import com.eventbooking.repository.ReminderRepository;
 import com.eventbooking.repository.UserRepository;
 import com.eventbooking.service.ReminderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -18,12 +20,19 @@ public class ReminderServiceImpl implements ReminderService {
   private final UserRepository userRepository;
 
 
-  private User getCurrentUserEntity() {
-    Long currentUserId = 1L;
-    return userRepository
-            .findById(currentUserId)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-  }
+    private User getCurrentUserEntity() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new IllegalStateException("No authenticated user");
+        }
+        String email = authentication.getName();
+        return userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
 
   @Override
   public ReminderResponse updateReminderSettings(ReminderUpdateRequest request){

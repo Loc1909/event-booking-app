@@ -7,6 +7,8 @@ import com.eventbooking.exception.ResourceNotFoundException;
 import com.eventbooking.repository.UserRepository;
 import com.eventbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -16,11 +18,18 @@ public class UserServiceImpl implements UserService {
 
 
   private User getCurrentUserEntity() {
-    Long currentUserId = 1L;
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null || !authentication.isAuthenticated()
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+      throw new IllegalStateException("No authenticated user");
+    }
+    String email = authentication.getName();
     return userRepository
-            .findById(currentUserId)
+            .findByEmail(email)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
   }
+
 
 
   @Override
