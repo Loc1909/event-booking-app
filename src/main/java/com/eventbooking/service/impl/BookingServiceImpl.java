@@ -4,27 +4,22 @@ import com.eventbooking.common.constant.BookingStatus;
 import com.eventbooking.common.constant.ErrorCode;
 import com.eventbooking.dto.booking.BookingCreateRequest;
 import com.eventbooking.dto.booking.BookingResponse;
-import com.eventbooking.dto.booking.TicketResponse;
 import com.eventbooking.entity.Booking;
 import com.eventbooking.entity.Event;
 import com.eventbooking.entity.Payment;
 import com.eventbooking.entity.User;
 import com.eventbooking.exception.EntityNotFoundException;
-import com.eventbooking.exception.UnauthorizedException;
+import com.eventbooking.exception.ResourceNotFoundException;
 import com.eventbooking.mapper.BookingMapper;
 import com.eventbooking.repository.BookingRepository;
 import com.eventbooking.repository.EventRepository;
-import com.eventbooking.repository.UserRepository;
 import com.eventbooking.service.BookingService;
-import com.eventbooking.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,26 +27,17 @@ import java.util.List;
 public class BookingServiceImpl implements BookingService {
   BookingRepository bookingRepo;
   EventRepository eventRepo;
-  UserRepository userRepo;
 
   BookingMapper mapper;
 
+  UserServiceImpl userService;
 
   @Override
   public BookingResponse create(BookingCreateRequest request) {
-    var authen = SecurityContextHolder.getContext().getAuthentication();
-
-    if (authen == null || authen.getPrincipal() == null) {
-      throw new UnauthorizedException("Unauthorized - please login and try again");
-    }
-
-    Object principal = authen.getPrincipal();
-
-    User user = userRepo.findByEmail(principal.toString())
-            .orElseThrow(() -> new UnauthorizedException("Unauthorized - please login and try again"));
+    User user = userService.getCurrentUserEntity();
 
     Event event = eventRepo.findById(request.eventId())
-            .orElseThrow(() -> new EntityNotFoundException(ErrorCode.EVENT_NOT_FOUND, "Event not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
     BigDecimal totalPrice = event.getPrice().multiply(new BigDecimal(request.quantity()));
 
@@ -62,10 +48,5 @@ public class BookingServiceImpl implements BookingService {
     booking.setStatus(BookingStatus.PENDING);
 
     return mapper.toBookingResponse(bookingRepo.save(booking));
-  }
-
-  @Override
-  public List<TicketResponse> getMyTickets() {
-    return List.of();
   }
 }

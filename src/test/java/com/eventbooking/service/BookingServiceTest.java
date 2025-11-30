@@ -6,13 +6,14 @@ import com.eventbooking.dto.event.EventResponse;
 import com.eventbooking.entity.Booking;
 import com.eventbooking.entity.Event;
 import com.eventbooking.entity.User;
-import com.eventbooking.exception.EntityNotFoundException;
+import com.eventbooking.exception.ResourceNotFoundException;
 import com.eventbooking.exception.UnauthorizedException;
 import com.eventbooking.mapper.BookingMapper;
 import com.eventbooking.repository.BookingRepository;
 import com.eventbooking.repository.EventRepository;
 import com.eventbooking.repository.UserRepository;
 import com.eventbooking.service.impl.BookingServiceImpl;
+import com.eventbooking.service.impl.UserServiceImpl;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +46,7 @@ public class BookingServiceTest {
     EventRepository eventRepo;
 
     @Mock
-    UserRepository userRepo;
+    UserServiceImpl userService;
 
     @Mock
     BookingMapper bookingMapper;
@@ -93,19 +94,10 @@ public class BookingServiceTest {
                 .build();
     }
 
-    // ==================================================================================
-    // createBooking tests
-    // ==================================================================================
     @Test
-    @DisplayName("create: return BookingResponse when all input is valid")
+    @DisplayName("create: return BookingResponse when request is valid")
     public void create_returnsBookingResponse_whenAllVaid() {
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        "password",
-                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
-
-        when(userRepo.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(userService.getCurrentUserEntity()).thenReturn(user);
         when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
         doAnswer(invocation -> {
             Booking b = invocation.getArgument(0);
@@ -127,6 +119,8 @@ public class BookingServiceTest {
                         .build())
                 .build(), actual);
 
+        verify(userService).getCurrentUserEntity();
+        verify(eventRepo).findById(any(Long.class));
         verify(bookingMapper).toEntity(any(Booking.class), eq(request));
         verify(bookingRepo).save(any(Booking.class));
         verify(bookingMapper).toBookingResponse(eq(booking));
@@ -135,11 +129,11 @@ public class BookingServiceTest {
     @Test
     @DisplayName("create: throw UnauthorizedException when User not login")
     public void create_throwsUnauthorize_whenEventNotFound() {
-        SecurityContextHolder.clearContext();
+        when(userService.getCurrentUserEntity()).thenThrow(new UnauthorizedException("No authenticated user"));
 
         assertThrows(UnauthorizedException.class, () -> service.create(request));
 
-        verify(userRepo, never()).findByEmail(any(String.class));
+        verify(userService).getCurrentUserEntity();
         verify(eventRepo, never()).findById(any(Long.class));
         verify(bookingMapper, never()).toEntity(any(Booking.class), eq(request));
         verify(bookingRepo, never()).save(any(Booking.class));
@@ -147,7 +141,7 @@ public class BookingServiceTest {
     }
 
     @Test
-    @DisplayName("create: throw EntityNotFoundException when Event not found")
+    @DisplayName("create: throw ResourceNotFoundException when Event not found")
     public void create_throwsNotFound_whenEventNotFound() {
         Long nonExistentEVENT_ID = 999L;
         SecurityContextHolder.getContext()
@@ -156,13 +150,13 @@ public class BookingServiceTest {
                         "password",
                         List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
 
-        when(userRepo.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(userService.getCurrentUserEntity()).thenReturn(user);
         when(eventRepo.findById(nonExistentEVENT_ID)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () ->
+        assertThrows(ResourceNotFoundException.class, () ->
                 service.create(new BookingCreateRequest(nonExistentEVENT_ID, QUANTITY)));
 
-        verify(userRepo).findByEmail(any(String.class));
+        verify(userService).getCurrentUserEntity();
         verify(eventRepo).findById(eq(nonExistentEVENT_ID));
         verify(bookingMapper, never()).toEntity(any(Booking.class), eq(request));
         verify(bookingRepo, never()).save(any(Booking.class));

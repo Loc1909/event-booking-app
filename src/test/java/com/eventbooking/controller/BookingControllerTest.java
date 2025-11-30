@@ -3,6 +3,7 @@ package com.eventbooking.controller;
 import com.eventbooking.dto.booking.BookingCreateRequest;
 import com.eventbooking.dto.booking.BookingResponse;
 import com.eventbooking.dto.event.EventResponse;
+import com.eventbooking.security.JwtAuthenticationFilter;
 import com.eventbooking.service.BookingService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -35,6 +36,25 @@ class BookingControllerTest {
     BookingCreateRequest request;
     BookingResponse response;
 
+    @MockitoBean
+    JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @BeforeEach
+    void setupSecurityFilterPassThrough() throws Exception {
+        Mockito.doAnswer(
+                        invocation -> {
+                            var request =
+                                    invocation.getArgument(0, jakarta.servlet.http.HttpServletRequest.class);
+                            var response =
+                                    invocation.getArgument(1, jakarta.servlet.http.HttpServletResponse.class);
+                            var chain = invocation.getArgument(2, jakarta.servlet.FilterChain.class);
+                            chain.doFilter(request, response);
+                            return null;
+                        })
+                .when(jwtAuthenticationFilter)
+                .doFilter(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
     @BeforeEach
     void initData() {
         Long EVENT_ID = 1L;
@@ -50,9 +70,6 @@ class BookingControllerTest {
                 .build();
     }
 
-    // ==================================================================================
-    // createBooking tests
-    // ==================================================================================
     @Test
     @DisplayName("POST /api/bookings — returns 201 CREATED when valid data")
     void createBooking_returns201_whenValidData() throws Exception {
@@ -77,7 +94,7 @@ class BookingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"eventId\": null, \"quantity\": 0}"))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("Validation Error"))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors").isNotEmpty());
 

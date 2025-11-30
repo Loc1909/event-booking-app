@@ -51,7 +51,7 @@ public class EventServiceImpl implements EventService {
     Event event = eventRepo.findById(id).orElseThrow(() ->
             new EntityNotFoundException(ErrorCode.EVENT_NOT_FOUND,"Event not found"));
 
-    BigDecimal[] coords = geocodingService.getCoordinates(event.getLocation()).orElseThrow(() ->
+    BigDecimal[] coords = geocodingService.getCoordinates(request.location()).orElseThrow(() ->
             new BadRequestException("Location not existed!"));
 
     eventMapper.toEntity(event, request);

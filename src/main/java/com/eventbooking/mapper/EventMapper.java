@@ -11,6 +11,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Mapper(componentModel = "spring")
 public interface EventMapper {
@@ -37,8 +38,8 @@ public interface EventMapper {
     EventResponse toResponse(NearbyEventProjection projection);
 
     @Named("stringToLocalDate")
-    default LocalDate stringToLocalDate(String dateTime) {
+    default LocalDateTime stringToLocalDate(String dateTime) {
         if (dateTime == null || dateTime.isBlank()) return null;
-        return LocalDate.parse(dateTime);
+        return LocalDateTime.parse(dateTime);
     }
 }

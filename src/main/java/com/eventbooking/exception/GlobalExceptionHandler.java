@@ -8,9 +8,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 
@@ -30,6 +30,7 @@ public class GlobalExceptionHandler {
     // Phương thức chung để xây dựng Body phản hồi lỗi cho các Custom Exception
     private Map<String, Object> buildErrorBody(BaseException ex, String path) {
         Map<String, Object> body = new LinkedHashMap<>();
+        body.put("success", false);
         body.put("timestamp", LocalDateTime.now());
         body.put("status", ex.getHttpStatus().value());
         body.put("errorCode", ex.getErrorCode());
@@ -40,7 +41,6 @@ public class GlobalExceptionHandler {
 
   // Record/Class nội bộ 1: Cấu trúc cho lỗi Validation (field: message)
   private record FieldErrorDetail(String field, String message) {}
-
 
   // Record/Class nội bộ 2: Cấu trúc lỗi đơn giản cho Custom/BaseException (errorCode: message)
   private record SimpleErrorDetail(String errorCode, String message) {}
@@ -83,37 +83,37 @@ public class GlobalExceptionHandler {
               .body(ApiResponseBuilder.error(ex.getMessage(), errorDetail));
   }
 
-
   protected ResponseEntity<Object> handleBindException(
       BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
     return buildValidationErrorResponse(ex.getBindingResult());
   }
 
-  // 2. Gộp TẤT CẢ các Custom Exception (Handlers 2, 3, 4, 5, 6, 7) vào một Handler duy nhất
-  // đều kế thừa từ BaseException hoặc có cấu trúc interface chung để lấy HttpStatus và ErrorCode.
-  @ExceptionHandler({
-    ConstraintViolationException.class,
-    EntityNotFoundException.class,
-    BadRequestException.class,
-    ConflictException.class,
-    ForbiddenException.class,
-    ResourceNotFoundException.class,
-    UnauthorizedException.class
-  })
-  public ResponseEntity<Object> handleCustomExceptions(
-      BaseException ex, HttpServletRequest request) {
-    // Đối với UnauthorizedException, trả về format đơn giản theo yêu cầu
-    if (ex instanceof UnauthorizedException) {
-      Map<String, Object> body = new LinkedHashMap<>();
-      body.put("success", false);
-      body.put("message", ex.getMessage());
-      return new ResponseEntity<>(body, ex.getHttpStatus());
-    }
-    
-    Map<String, Object> body = buildErrorBody(ex, request.getRequestURI());
-    return new ResponseEntity<>(body, ex.getHttpStatus());
-
-  }
+//  // 2. Gộp TẤT CẢ các Custom Exception (Handlers 2, 3, 4, 5, 6, 7) vào một Handler duy nhất
+//  // đều kế thừa từ BaseException hoặc có cấu trúc interface chung để lấy HttpStatus và ErrorCode.
+//  @ExceptionHandler({
+//    ConstraintViolationException.class,
+//    EntityNotFoundException.class,
+//    BadRequestException.class,
+//    ConflictException.class,
+//    ForbiddenException.class,
+//    ResourceNotFoundException.class,
+//    UnauthorizedException.class
+//  })
+//  public ResponseEntity<Object> handleCustomExceptions(
+//      BaseException ex, HttpServletRequest request) {
+//    // Đối với UnauthorizedException, trả về format đơn giản theo yêu cầu
+//    if (ex instanceof UnauthorizedException) {
+//      Map<String, Object> body = new LinkedHashMap<>();
+//      body.put("success", false);
+//      body.put("message", ex.getMessage());
+//      return new ResponseEntity<>(body, ex.getHttpStatus());
+//    }
+//
+//    Map<String, Object> body = buildErrorBody(ex, request.getRequestURI());
+//    return new ResponseEntity<>(body, ex.getHttpStatus());
+//
+//
+//  }
 
   // 3. Bắt tất cả lỗi còn lại (Internal Server Error)
   // Trả về HTTP 500
@@ -131,6 +131,20 @@ public class GlobalExceptionHandler {
             ApiResponseBuilder.error(
                 "An unexpected error occurred. Please try again later.", errorDetail));
   }
+
+  @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<BaseResponse<?>> handleAccessDeniedException(
+        AccessDeniedException ex, HttpServletRequest request) {
+        SimpleErrorDetail errorDetail =
+            new SimpleErrorDetail(
+                "ACCESS_DENIED",
+                ex.getMessage() != null ? ex.getMessage() : "You do not have permission to access this resource.");
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(
+                ApiResponseBuilder.error(
+                    "Forbidden – You do not have permission to perform this action", errorDetail));
+    }
 
   private ResponseEntity<Object> buildValidationErrorResponse(BindingResult bindingResult) {
     List<Map<String, String>> errors =

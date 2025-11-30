@@ -2,6 +2,7 @@ package com.eventbooking.controller;
 
 import com.eventbooking.dto.payment.PaymentRequest;
 import com.eventbooking.dto.payment.PaymentResponse;
+import com.eventbooking.security.JwtAuthenticationFilter;
 import com.eventbooking.service.PaymentService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -35,6 +36,25 @@ class PaymentControllerTest {
 
     PaymentRequest request;
     PaymentResponse response;
+
+    @MockitoBean
+    JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @BeforeEach
+    void setupSecurityFilterPassThrough() throws Exception {
+        Mockito.doAnswer(
+                        invocation -> {
+                            var request =
+                                    invocation.getArgument(0, jakarta.servlet.http.HttpServletRequest.class);
+                            var response =
+                                    invocation.getArgument(1, jakarta.servlet.http.HttpServletResponse.class);
+                            var chain = invocation.getArgument(2, jakarta.servlet.FilterChain.class);
+                            chain.doFilter(request, response);
+                            return null;
+                        })
+                .when(jwtAuthenticationFilter)
+                .doFilter(Mockito.any(), Mockito.any(), Mockito.any());
+    }
 
     @BeforeEach
     void initData() {
@@ -90,7 +110,7 @@ class PaymentControllerTest {
                                     }
                                 """))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("Validation Error"))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors").isNotEmpty());
 

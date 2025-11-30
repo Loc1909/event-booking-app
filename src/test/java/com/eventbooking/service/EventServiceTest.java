@@ -100,7 +100,7 @@ public class EventServiceTest {
         }));
         when(eventMapper.toEntity(request)).thenReturn(event);
         when(eventRepo.save(event)).thenReturn(event);
-        when(eventMapper.toResponse(event)).thenReturn(response);
+        when(eventMapper.toDetailsResponse(event)).thenReturn(response);
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         EventDetailsResponse actual = eventService.create(request);
@@ -122,7 +122,7 @@ public class EventServiceTest {
 
         verify(geocodingService).getCoordinates(eq(request.location()));
         verify(eventMapper).toEntity(eq(request));
-        verify(eventMapper).toResponse(eq(event));
+        verify(eventMapper).toDetailsResponse(eq(event));
     }
 
     @Test
@@ -144,7 +144,7 @@ public class EventServiceTest {
         verify(geocodingService).getCoordinates(eq(request.location()));
         verify(eventMapper, never()).toEntity(any(EventRequest.class));
         verify(eventRepo, never()).save(any(Event.class));
-        verify(eventMapper, never()).toResponse(any(Event.class));
+        verify(eventMapper, never()).toDetailsResponse(any(Event.class));
     }
 
     // ==================================================================================
@@ -160,7 +160,7 @@ public class EventServiceTest {
         }));
         doNothing().when(eventMapper).toEntity(event, request);
         when(eventRepo.save(event)).thenReturn(event);
-        when(eventMapper.toResponse(event)).thenReturn(response);
+        when(eventMapper.toDetailsResponse(event)).thenReturn(response);
 
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         EventDetailsResponse actual = eventService.update(EVENT_ID, request);
@@ -183,7 +183,7 @@ public class EventServiceTest {
         verify(eventRepo).findById(eq(EVENT_ID));
         verify(geocodingService).getCoordinates(eq(request.location()));
         verify(eventMapper).toEntity(eq(event), eq(request));
-        verify(eventMapper).toResponse(eq(event));
+        verify(eventMapper).toDetailsResponse(eq(event));
     }
 
     @Test
@@ -198,7 +198,7 @@ public class EventServiceTest {
         verify(geocodingService, never()).getCoordinates(any(String.class));
         verify(eventMapper, never()).toEntity(any(Event.class), any(EventRequest.class));
         verify(eventRepo, never()).save(any(Event.class));
-        verify(eventMapper, never()).toResponse(any(Event.class));
+        verify(eventMapper, never()).toDetailsResponse(any(Event.class));
     }
 
     @Test
@@ -222,7 +222,7 @@ public class EventServiceTest {
         verify(geocodingService).getCoordinates(eq(request.location()));
         verify(eventMapper, never()).toEntity(any(Event.class), any(EventRequest.class));
         verify(eventRepo, never()).save(any(Event.class));
-        verify(eventMapper, never()).toResponse(any(Event.class));
+        verify(eventMapper, never()).toDetailsResponse(any(Event.class));
     }
 
     // ==================================================================================
@@ -258,7 +258,7 @@ public class EventServiceTest {
     @DisplayName("getById: trả về EventDetailsResponse khi Event tồn tại")
     public void getById_returnEventDetailsResponse_whenEventExists() {
         when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
-        when(eventMapper.toResponse(event)).thenReturn(response);
+        when(eventMapper.toDetailsResponse(event)).thenReturn(response);
 
         EventDetailsResponse actual = eventService.getById(EVENT_ID);
 
@@ -273,7 +273,7 @@ public class EventServiceTest {
                 .build(), actual);
 
         verify(eventRepo).findById(eq(EVENT_ID));
-        verify(eventMapper).toResponse(eq(event));
+        verify(eventMapper).toDetailsResponse(eq(event));
     }
 
     @Test
@@ -285,6 +285,6 @@ public class EventServiceTest {
         assertThrows(EntityNotFoundException.class, () -> eventService.getById(invalidEVENT_ID));
 
         verify(eventRepo).findById(eq(invalidEVENT_ID));
-        verify(eventMapper, never()).toResponse(any(Event.class));
+        verify(eventMapper, never()).toDetailsResponse(any(Event.class));
     }
 }

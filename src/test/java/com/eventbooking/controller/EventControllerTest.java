@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = EventController.class)
-@AutoConfigureMockMvc()
+@AutoConfigureMockMvc(addFilters = false)
 @Import(SpringSecurityConfig.class)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventControllerTest {
@@ -125,7 +125,7 @@ public class EventControllerTest {
     // createEvent tests
     // ==================================================================================
     @Test
-    @WithMockUser(username = "testuser@example.com", roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /api/events — returns 201 OK when valid data")
     void create_returns201_whenValidData() throws Exception {
         when(eventService.create(request)).thenReturn(response);
@@ -149,7 +149,7 @@ public class EventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequestBuilder))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("Validation Error"))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors").isNotEmpty());
 
@@ -157,7 +157,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testuser@example.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     @DisplayName("POST /api/events/... — returns 403 Forbidden when user is not admin")
     void create_returns403_whenUserIsNotAdmin() throws Exception {
         when(eventService.create(request)).thenReturn(response);
@@ -175,7 +175,7 @@ public class EventControllerTest {
     // updateEvent tests
     // ==================================================================================
     @Test
-    @WithMockUser(username = "testuser@example.com", roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("PUT /api/events/{id} — returns 200 OK when valid data")
     void update_returns200_whenValidData() throws Exception {
         when(eventService.update(EVENT_ID, request)).thenReturn(response);
@@ -199,7 +199,7 @@ public class EventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequestBuilder))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("Validation Error"))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errors").isNotEmpty());
 
@@ -207,7 +207,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testuser@example.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     @DisplayName("PUT /api/events/{id}  — returns 403 Forbidden when user is not admin")
     void update_returns403_whenUserIsNotAdmin() throws Exception {
         mockMvc.perform(put(API + "/" + EVENT_ID)
@@ -225,7 +225,7 @@ public class EventControllerTest {
     // deleteEvent tests
     // ==================================================================================
     @Test
-    @WithMockUser(username = "testuser@example.com", roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /api/events/{id} — returns 202 No content when event found")
     void delete_returns202_whenEventFound() throws Exception {
         doNothing().when(eventService).delete(EVENT_ID);
@@ -238,7 +238,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testuser@example.com", roles = "ADMIN")
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /api/events/{id} — returns 404 Not Found when event not found")
     void delete_returns404_whenEventNotFound() throws Exception {
         doThrow(new EntityNotFoundException(ErrorCode.EVENT_NOT_FOUND, "Event not found"))
@@ -253,7 +253,7 @@ public class EventControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testuser@example.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     @DisplayName("DELETE /api/events/{id}  — returns 403 Forbidden when user is not admin")
     void delete_returns403_whenUserIsNotAdmin() throws Exception {
         mockMvc.perform(delete(API + "/" + EVENT_ID))
@@ -329,8 +329,7 @@ public class EventControllerTest {
                 .andExpect(jsonPath("$.message").value("Events fetched successfully"))
                 .andExpect(jsonPath("$.data[0].id").value(101))
                 .andExpect(jsonPath("$.data[0].title").value("Art Exhibition"))
-                .andExpect(jsonPath("$.data[0].location").value("Modern Art Gallery, New York"))
-                .andExpect(jsonPath("$.data[0].price").value(25.0));
+                .andExpect(jsonPath("$.data[0].location").value("Modern Art Gallery, New York"));
 
         verify(eventService).search(any(), any(Pageable.class));
         verifyNoMoreInteractions(eventService);

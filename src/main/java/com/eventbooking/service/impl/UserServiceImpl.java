@@ -4,6 +4,7 @@ import com.eventbooking.dto.user.UserProfileUpdateRequest;
 import com.eventbooking.dto.user.UserResponse;
 import com.eventbooking.entity.User;
 import com.eventbooking.exception.ResourceNotFoundException;
+import com.eventbooking.exception.UnauthorizedException;
 import com.eventbooking.repository.UserRepository;
 import com.eventbooking.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +17,12 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
 
-
-  private User getCurrentUserEntity() {
+  public User getCurrentUserEntity() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication == null || !authentication.isAuthenticated()
             || "anonymousUser".equals(authentication.getPrincipal())) {
-      throw new IllegalStateException("No authenticated user");
+      throw new UnauthorizedException("No authenticated user");
     }
     String email = authentication.getName();
     return userRepository
@@ -30,10 +30,8 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
   }
 
-
-
   @Override
-  public UserResponse getCurrentUser(){
+  public UserResponse getCurrentUser() {
     User user = getCurrentUserEntity();
     return toUserResponse(user);
   }
@@ -49,12 +47,12 @@ public class UserServiceImpl implements UserService {
     return toUserResponse(save);
   }
 
-    private UserResponse toUserResponse(User user) {
-           UserResponse response = new UserResponse();
-           response.setUserId(user.getId().toString());
-              response.setFullName(user.getFullName());
-              response.setEmail(user.getEmail());
-                response.setAvatar(user.getAvatar());
-              return response;
-    }
+  private UserResponse toUserResponse(User user) {
+    UserResponse response = new UserResponse();
+    response.setUserId(user.getId().toString());
+    response.setFullName(user.getFullName());
+    response.setEmail(user.getEmail());
+    response.setAvatar(user.getAvatar());
+    return response;
+  }
 }

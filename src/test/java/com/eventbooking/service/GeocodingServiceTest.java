@@ -2,7 +2,7 @@ package com.eventbooking.service;
 
 import com.eventbooking.client.GeoHttpClient;
 import com.eventbooking.exception.BadRequestException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.eventbooking.service.impl.GeocodingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ public class GeocodingServiceTest {
     private GeoHttpClient httpClient;
 
     @InjectMocks
-    private GeocodingService service;
+    private GeocodingServiceImpl service;
 
     private BigDecimal[] coords;
 
