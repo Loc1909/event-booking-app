@@ -19,6 +19,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,44 +28,49 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final UserMapper userMapper;
+  private final AuthenticationManager authenticationManager;
+  private final JwtService jwtService;
 
-    @Override
-    @Transactional
-    public LoginResponse login(LoginRequest loginRequest) {
+  @Override
+  @Transactional
+  public LoginResponse login(LoginRequest loginRequest) {
+    try {
+      // 1. XÁC THỰC (Authentication)
+      var authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(
+                  loginRequest.email(), loginRequest.password()));
 
-        // 1. XÁC THỰC (Authentication)
-        var authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password()));
+      // 2. LẤY USER VÀ TẠO TOKEN
+      var user = (User) authentication.getPrincipal();
 
-        // 2. LẤY USER VÀ TẠO TOKEN
-        var user = (User) authentication.getPrincipal();
+      // Tạo JWT Token
+      String accessToken = jwtService.generateToken(user);
+      // Lấy thời gian hết hạn (ví dụ: 3600 giây)
+      Long expiresInSeconds = jwtService.getExpirationTimeInSeconds();
 
-        // Tạo JWT Token
-        String accessToken = jwtService.generateToken(user);
-        // Lấy thời gian hết hạn (ví dụ: 3600 giây)
-        Long expiresInSeconds = jwtService.getExpirationTimeInSeconds();
+      // 3. TRẢ VỀ LOGIN RESPONSE
+      return new LoginResponse(accessToken, expiresInSeconds);
+    } catch (AuthenticationException e) {
 
-        // 3. TRẢ VỀ LOGIN RESPONSE
-        return new LoginResponse(accessToken, expiresInSeconds);
+      throw new UnauthorizedException("Invalid email or password");
+    }
+  }
+
+  @Override
+  @Transactional
+  public RegisterResponse register(RegisterRequest registerRequest) {
+    if (userRepository.existsByEmail(registerRequest.email())) {
+      throw new ConflictException("Email is already registered");
     }
 
-    @Override
-    @Transactional
-    public RegisterResponse register(RegisterRequest registerRequest) {
-        if (userRepository.existsByEmail(registerRequest.email())) {
-            throw new ConflictException("Email is already registered");
-        }
+    var registerUser = userMapper.toEntity(registerRequest);
+    registerUser.setRole(Role.USER);
+    registerUser.setPassword(passwordEncoder.encode(registerRequest.password()));
 
-        var registerUser = userMapper.toEntity(registerRequest);
-        registerUser.setRole(Role.USER);
-        registerUser.setPassword(passwordEncoder.encode(registerRequest.password()));
-
-        return userMapper.toDTO(userRepository.save(registerUser));
-    }
+    return userMapper.toDTO(userRepository.save(registerUser));
+  }
 }
