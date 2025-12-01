@@ -38,11 +38,11 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `avatar`, `role`, `
 -- Table: `reminders`
 -- Columns: id, user_id, event_reminder (TINYINT), created_at
 -- ================================
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (1, 1, 1, '2025-01-01 10:00:00');
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (2, 2, 1, '2025-01-02 11:00:00');
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (3, 3, 0, '2025-01-03 12:00:00');
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (4, 4, 1, '2025-01-04 13:00:00');
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (5, 5, 1, '2025-01-05 14:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (1, 1, 1, '2026-01-01 10:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (2, 2, 1, '2026-01-02 11:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (3, 3, 0, '2026-01-03 12:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (4, 4, 1, '2026-01-04 13:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (5, 5, 1, '2026-01-05 14:00:00');
 
 
 -- ================================
