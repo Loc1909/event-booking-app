@@ -38,11 +38,11 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `avatar`, `role`, `
 -- Table: `reminders`
 -- Columns: id, user_id, event_reminder (TINYINT), created_at
 -- ================================
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (1, 1, 1, '2026-01-01 10:00:00');
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (2, 2, 1, '2026-01-02 11:00:00');
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (3, 3, 0, '2026-01-03 12:00:00');
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (4, 4, 1, '2026-01-04 13:00:00');
-INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (5, 5, 1, '2026-01-05 14:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (1, 1, 1, '2025-01-01 10:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (2, 2, 1, '2025-01-02 11:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (3, 3, 0, '2025-01-03 12:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (4, 4, 1, '2025-01-04 13:00:00');
+INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES (5, 5, 1, '2025-01-05 14:00:00');
 
 
 -- ================================
@@ -50,11 +50,11 @@ INSERT INTO `reminders` (`id`, `user_id`, `event_reminder`, `created_at`) VALUES
 -- Table: `events`
 -- Columns: id, title, date_time (DATETIME), location, latitude, longitude, price, description, image_url, created_at, updated_at
 -- ================================
-INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (1, 'Music Festival', '2025-06-12 19:00:00', 'Ho Chi Minh City', 10.77688900, 106.70089700, 49.99, 'A summer music festival.', 'https://cdn.example.com/events/music.jpg', '2025-02-01 09:00:00', '2025-02-01 09:00:00');
-INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (2, 'Tech Conference', '2025-07-20 09:00:00', 'Hanoi', 21.02851100, 105.80481700, 120.00, 'Technology and innovation event.', 'https://cdn.example.com/events/tech.jpg', '2025-02-02 09:00:00', '2025-02-02 09:00:00');
-INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (3, 'Art Exhibition', '2025-05-12 10:00:00', 'Da Nang Art Center', 16.05440700, 108.20216400, 25.00, 'Modern art display.', 'https://cdn.example.com/events/art.jpg', '2025-02-03 09:00:00', '2025-02-03 09:00:00');
-INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (4, 'Football Match', '2025-08-05 17:30:00', 'My Dinh Stadium', 21.02851100, 105.80481700, 35.00, 'Friendly football match.', 'https://cdn.example.com/events/football.jpg', '2025-02-04 09:00:00', '2025-02-04 09:00:00');
-INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (5, 'Startup Pitching', '2025-09-10 14:00:00', 'HCM Innovation Hub', 10.77688900, 106.70089700, 0.00, 'Startup founders pitching ideas.', 'https://cdn.example.com/events/startup.jpg', '2025-02-05 09:00:00', '2025-02-05 09:00:00');
+INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (1, 'Music Festival', '2026-06-12 19:00:00', 'Ho Chi Minh City', 10.77688900, 106.70089700, 49.99, 'A summer music festival.', 'https://cdn.example.com/events/music.jpg', '2025-02-01 09:00:00', '2025-02-01 09:00:00');
+INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (2, 'Tech Conference', '2026-07-20 09:00:00', 'Hanoi', 21.02851100, 105.80481700, 120.00, 'Technology and innovation event.', 'https://cdn.example.com/events/tech.jpg', '2025-02-02 09:00:00', '2025-02-02 09:00:00');
+INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (3, 'Art Exhibition', '2026-05-12 10:00:00', 'Da Nang Art Center', 16.05440700, 108.20216400, 25.00, 'Modern art display.', 'https://cdn.example.com/events/art.jpg', '2025-02-03 09:00:00', '2025-02-03 09:00:00');
+INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (4, 'Football Match', '2026-08-05 17:30:00', 'My Dinh Stadium', 21.02851100, 105.80481700, 35.00, 'Friendly football match.', 'https://cdn.example.com/events/football.jpg', '2025-02-04 09:00:00', '2025-02-04 09:00:00');
+INSERT INTO `events` (`id`, `title`, `date_time`, `location`, `latitude`, `longitude`, `price`, `description`, `image_url`, `created_at`, `updated_at`) VALUES (5, 'Startup Pitching', '2026-09-10 14:00:00', 'HCM Innovation Hub', 10.77688900, 106.70089700, 0.00, 'Startup founders pitching ideas.', 'https://cdn.example.com/events/startup.jpg', '2025-02-05 09:00:00', '2025-02-05 09:00:00');
 
 
 -- ================================
