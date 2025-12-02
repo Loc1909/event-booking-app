@@ -1,6 +1,7 @@
 package com.eventbooking.dto.event;
 
 import com.eventbooking.common.constant.EventListType;
+import com.eventbooking.dto.event.validation.RequireCoordinatesForNearby;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@RequireCoordinatesForNearby
 public class EventListRequest {
 
   @Pattern(regexp = "popular|upcoming|nearby", message = "Invalid type value")

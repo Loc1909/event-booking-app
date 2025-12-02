@@ -27,5 +27,3 @@ out/
 .classpath
 .project
 .settings/
-target/
-test/
